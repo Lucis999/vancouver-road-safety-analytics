@@ -48,6 +48,29 @@ css = """
  #pk-panel:not(.pk-v2-open),#pk-ranking:not(.pk-v2-open),#pk-collision:not(.pk-v2-open){display:none!important}
  #pk-panel select,#pk-ranking select,#pk-collision select{max-width:100%!important;font-size:16px!important}
  #pk-panel button,#pk-ranking button,#pk-collision button{min-height:38px}
+ /* Mobile collision details: replace desktop horizontal grids with one column. */
+ #pk-collision{overflow-x:hidden!important;overflow-y:auto!important;padding:14px!important;
+   min-height:0!important;max-height:60dvh!important}
+ #pk-collision-content{width:100%!important;max-width:100%!important;min-width:0!important;
+   overflow-x:hidden!important;overflow-wrap:anywhere!important}
+ #pk-collision-content > div[style*="display:grid"]{display:grid!important;
+   grid-template-columns:minmax(0,1fr)!important;gap:9px!important;width:100%!important}
+ #pk-collision-content > div[style*="display:grid"] > *{min-width:0!important;
+   max-width:100%!important;box-sizing:border-box!important}
+ #pk-collision-content section{min-width:0!important;max-width:100%!important;
+   width:100%!important;box-sizing:border-box!important}
+ #pk-collision-content section div[style*="display:flex"]{min-width:0!important;
+   flex-wrap:wrap!important;row-gap:3px!important}
+ #pk-collision-content section div[style*="display:flex"] > span{min-width:0!important;
+   overflow-wrap:anywhere!important;flex:1 1 60%!important}
+ #pk-collision-content section div[style*="display:flex"] > b{flex:0 0 auto!important;
+   white-space:nowrap!important}
+ #pk-collision-content > div[style*="display:grid"] > div[style*="background:#f1f5f9"]{
+   display:flex!important;justify-content:space-between!important;align-items:center!important;
+   gap:10px!important;padding:11px 12px!important}
+ #pk-collision-content > div[style*="display:grid"] > div[style*="background:#f1f5f9"] > div{
+   min-width:0!important}
+
 }
 </style>
 """
