@@ -24,7 +24,7 @@ css = r"""
    height:auto!important;max-height:58dvh!important;overflow-y:auto!important}
  #pk-panel:not(.pk-mobile-open),#pk-ranking:not(.pk-mobile-open),
  #pk-collision:not(.pk-mobile-open){display:none!important}
- #pk-panel select,#pk-ranking select,#pk-collision select{max-width:100%!important;font-size:16px!important}
+ #pk-panel select,#pk-ranking select,#pk-collision select{max-width:100%!important;font-size:16px!important}\n #pk-panel,#pk-ranking,#pk-collision{overscroll-behavior:contain;-webkit-overflow-scrolling:touch}\n #pk-mobile-toolbar button{min-height:46px}
  #pk-panel button,#pk-ranking button,#pk-collision button{min-height:38px}
  #pk-panel input[type=checkbox],#pk-collision input[type=checkbox]{min-width:18px;min-height:18px}
 }
@@ -34,14 +34,14 @@ css = r"""
 #pk-mobile-toolbar button{pointer-events:auto;flex:1;min-width:0;padding:11px 5px;
  border:1px solid #94a3b8;border-radius:10px;background:white;color:#172033;
  font:600 13px Arial,sans-serif;box-shadow:0 2px 10px #0003}
-#pk-mobile-toolbar button[aria-expanded=true]{background:#0f766e;color:white;border-color:#0f766e}
+#pk-mobile-toolbar button[aria-expanded=true]{background:#0f766e;color:white;border-color:#0f766e}\n#pk-mobile-toolbar button:focus-visible{outline:3px solid #14b8a6;outline-offset:2px}\n#pk-mobile-map-options{display:none;position:fixed;bottom:calc(env(safe-area-inset-bottom,0px) + 20px);left:12px;z-index:10005;gap:6px}\n@media(max-width:760px){#pk-mobile-map-options{display:flex}}\n#pk-mobile-map-options button{border:1px solid #94a3b8;border-radius:9px;padding:9px 12px;background:white;color:#172033;font:600 12px Arial;box-shadow:0 2px 9px #0003}\n#pk-mobile-map-options button[aria-pressed=true]{background:#0f766e;color:white}
 </style>
 """
 toolbar = """<div id="pk-mobile-toolbar" role="group" aria-label="Dashboard panels">
 <button type="button" data-pk-target="pk-panel" aria-controls="pk-panel" aria-expanded="false">Filters</button>
 <button type="button" data-pk-target="pk-ranking" aria-controls="pk-ranking" aria-expanded="false">Top 10</button>
 <button type="button" data-pk-target="pk-collision" aria-controls="pk-collision" aria-expanded="false">Collisions</button>
-</div>"""
+</div><div id="pk-mobile-map-options"><button type="button" id="pk-basemap-toggle" aria-pressed="false">Street map: Off</button></div>"""
 js = r"""<script id="pk-mobile-interaction">
 (function(){
  function init(){
@@ -60,6 +60,35 @@ js = r"""<script id="pk-mobile-interaction">
    toggle(b.getAttribute('aria-expanded')==='true'?'':b.dataset.pkTarget);
   })});
   toggle('');
+  // Mobile: touch a road to select its location, rather than relying on hover.
+  // Existing road click listeners are preserved.
+  document.addEventListener('keydown',function(e){if(e.key==='Escape')toggle('')});
+  document.querySelectorAll('.leaflet-container').forEach(function(el){
+   el.addEventListener('click',function(e){
+    if(window.matchMedia('(max-width:760px)').matches && !e.target.closest('#pk-panel,#pk-ranking,#pk-collision,#pk-mobile-toolbar'))toggle('');
+   });
+  });
+  var basemap=document.getElementById('pk-basemap-toggle');
+  var mapInstance=null,baseLayer=null;
+  function findMap(){
+   if(mapInstance)return mapInstance;
+   var maps=Object.keys(window).filter(function(k){return /^map_[a-zA-Z0-9_]+$/.test(k)});
+   for(var i=0;i<maps.length;i++){var m=window[maps[i]];if(m&&typeof m.addLayer==='function'&&typeof m.getCenter==='function'){mapInstance=m;break}}
+   return mapInstance;
+  }
+  if(basemap)basemap.addEventListener('click',function(){
+   var m=findMap();
+   if(!m||!window.L)return;
+   if(!baseLayer){
+    baseLayer=L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+     attribution:'&copy; OpenStreetMap contributors',maxZoom:19,
+     crossOrigin:true
+    });
+    baseLayer.on('tileerror',function(){basemap.textContent='Street map unavailable'});
+   }
+   if(m.hasLayer(baseLayer)){m.removeLayer(baseLayer);basemap.setAttribute('aria-pressed','false');basemap.textContent='Street map: Off'}
+   else{baseLayer.addTo(m);baseLayer.bringToBack();basemap.setAttribute('aria-pressed','true');basemap.textContent='Street map: On'}
+  });
   var mq=window.matchMedia('(max-width: 760px)');
   if(mq.addEventListener)mq.addEventListener('change',function(){toggle('')});
  }
