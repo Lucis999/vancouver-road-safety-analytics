@@ -1,0 +1,40 @@
+﻿group,name,status,detail
+Code,01_add_coordinates.py,PASS,Python syntax valid
+Code,02_add_block_info.py,PASS,Python syntax valid
+Code,03_audit_and_clean.py,PASS,Python syntax valid
+Code,04_local_street_map.py,PASS,Python syntax valid
+Code,05_collision_extension.py,PASS,Python syntax valid
+Code,06_review_collision_matches.py,PASS,Python syntax valid
+Code,04_vancouver_road_safety_dashboard_v12_4.py,PASS,Python syntax valid
+Release,Required Python dependencies,PASS,All five core packages declared
+Release,README.md,PASS,File exists
+Release,Dockerfile,PASS,File exists
+Release,run_dashboard.bat,PASS,File exists
+Release,rebuild_all.bat,PASS,File exists
+Release,docs/RUNBOOK.md,PASS,File exists
+Release,docs/METHODOLOGY.md,PASS,File exists
+Release,docs/DATA_QUALITY.md,PASS,File exists
+Release,run_dashboard.bat: v12.4 target,PASS,Expected v12.4 entry point
+Release,rebuild_all.bat: v12.4 target,PASS,Expected v12.4 entry point
+Release,Central data path configuration,PASS,data_source paths configured
+Data,Raw input: parking-tickets-2020-2025.csv,PASS,Available locally
+Data,Raw input: public-streets.csv,PASS,Available locally
+Data,Raw input: block-numbers.csv,PASS,Available locally
+Data,Raw input: Lower Mainland_Full Data_data.csv,PASS,Available locally
+Data,Processed output: processed/03_quality_results/parking_tickets_clean_geocoded.csv,PASS,Available locally
+Data,Processed output: processed/05_collision_results/collision_locations.csv,PASS,Available locally
+Dashboard,HTML document,PASS,HTML document boundaries
+Dashboard,Layer selector,PASS,Static HTML token present
+Dashboard,Year selector,PASS,Static HTML token present
+Dashboard,Year comparison,PASS,Static HTML token present
+Dashboard,Road highlights,PASS,Static HTML token present
+Dashboard,Infraction ranking,PASS,Static HTML token present
+Dashboard,Collision detail,PASS,Static HTML token present
+Dashboard,Radius selector,PASS,Static HTML token present
+Dashboard,Map layer,PASS,Static HTML token present
+Dashboard,Interactive behavior,SKIP,Requires browser testing; static HTML inspection cannot prove functionality
+Dashboard,External JavaScript/CSS,WARN,HTML references remote assets; offline use may be incomplete
+Dashboard,HTML size,PASS,14.96 MB
+Dashboard,Generated vs published HTML,PASS,SHA256 identical
+Data,Cleaned parking coordinate bounds,PASS,"Rows=2,430,399; invalid=0; year counts={'2025': 444241, '2023': 415307, '2020': 334885, '2024': 436137, '2021': 400485, '2022': 399344}; status counts={'IS': 2103785, 'VA': 307044, 'WR': 16371, 'VS': 3199}"
+Data,Collision crash weights,PASS,"Grouped rows=124,291; total weighted crashes=233,440; match methods={'Intersection': 62034, 'BlockRange': 42388, 'Unmatched': 16699, 'AmbiguousIntersection': 3170}"
