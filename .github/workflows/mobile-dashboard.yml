@@ -1,0 +1,44 @@
+name: Publish mobile dashboard fix
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/patch_mobile_pages.py'
+      - '.github/workflows/mobile-dashboard.yml'
+permissions:
+  contents: write
+jobs:
+  mobile-patch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout patch script
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          path: source
+      - name: Checkout deployed dashboard
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          path: public
+          persist-credentials: true
+      - name: Apply responsive mobile patch
+        run: python ../source/scripts/patch_mobile_pages.py
+        working-directory: public
+      - name: Verify patch
+        run: |
+          grep -q 'MOBILE-RESPONSIVE-V1 START' index.html
+          grep -q 'pk-mobile-toolbar' index.html
+          git diff --check
+        working-directory: public
+      - name: Commit and publish updated dashboard
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          if ! git diff --cached --quiet; then
+            git commit -m "Publish mobile responsive dashboard controls"
+            git push origin HEAD:gh-pages
+          fi
+        working-directory: public
