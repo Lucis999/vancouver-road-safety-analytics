@@ -1,11 +1,6 @@
 name: Publish mobile dashboard fix
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - 'scripts/patch_mobile_pages.py'
-      - '.github/workflows/mobile-dashboard.yml'
 permissions:
   contents: write
 jobs:
