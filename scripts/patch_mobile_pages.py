@@ -14,8 +14,8 @@ if start in html or end in html:
     css_end = html.index(css_end_tag, css_start) + len(css_end_tag)
     html = html[:css_start] + html[css_end:]
     html = html.replace(end, "", 1)
-    html = re.sub(r'<div id="pk-mobile-toolbar"\\b.*?</div>', "", html, count=1, flags=re.S)
-    html = re.sub(r'<div id="pk-mobile-map-options"\\b.*?</div>', "", html, count=1, flags=re.S)
+    html = re.sub(r'<div id="pk-mobile-toolbar"\b.*?</div>', "", html, count=1, flags=re.S)
+    html = re.sub(r'<div id="pk-mobile-map-options"\b.*?</div>', "", html, count=1, flags=re.S)
     html = re.sub(r'<script id="pk-mobile-interaction">.*?</script>', "", html, count=1, flags=re.S)
 # An older patch may have injected its CSS/JS without the current marker layout.
 html = re.sub(r'<style id="mobile-responsive-v1">.*?</style>', "", html, count=1, flags=re.S)
