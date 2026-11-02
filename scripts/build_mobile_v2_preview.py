@@ -13,8 +13,8 @@ assert "</head>" in html and "</body>" in html
 html = re.sub(r'<!-- MOBILE-RESPONSIVE-V1 START -->\\s*', '', html, count=1)
 html = re.sub(r'<!-- MOBILE-RESPONSIVE-V1 END -->\\s*', '', html, count=1)
 html = re.sub(r'<style id="mobile-responsive-v1">.*?</style>', '', html, count=1, flags=re.S)
-html = re.sub(r'<div id="pk-mobile-toolbar"\\b.*?</div>', '', html, count=1, flags=re.S)
-html = re.sub(r'<div id="pk-mobile-map-options"\\b.*?</div>', '', html, count=1, flags=re.S)
+html = re.sub(r'<div id="pk-mobile-toolbar"\b.*?</div>', '', html, count=1, flags=re.S)
+html = re.sub(r'<div id="pk-mobile-map-options"\b.*?</div>', '', html, count=1, flags=re.S)
 html = re.sub(r'<script id="pk-mobile-interaction">.*?</script>', '', html, count=1, flags=re.S)
 
 css = """
