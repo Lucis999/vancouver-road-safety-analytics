@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/mobile-v2-preview.yml'
+      - 'scripts/build_mobile_v2_preview.py'
 permissions:
   contents: write
 concurrency:
