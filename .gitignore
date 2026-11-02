@@ -1,0 +1,15 @@
+# Python caches and environments
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+.env
+# Local datasets and generated artifacts
+/data_source/raw/
+/data_source/intermediate/
+/data_source/processed/
+/data_source/output/
+/validation_results/
+# OS files
+.DS_Store
+Thumbs.db
