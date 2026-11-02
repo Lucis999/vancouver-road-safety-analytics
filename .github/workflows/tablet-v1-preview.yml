@@ -1,0 +1,50 @@
+name: Build Tablet v1 Preview (non-production)
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/tablet-v1-preview.yml'
+      - 'scripts/build_tablet_v1_preview.py'
+permissions:
+  contents: write
+concurrency:
+  group: tablet-v1-preview
+  cancel-in-progress: false
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          path: source
+      - uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          path: public
+          persist-credentials: true
+      - name: Generate tablet preview
+        working-directory: public
+        run: |
+          mkdir -p tablet-v1
+          cp index.html tablet-v1/index.html
+          cd tablet-v1
+          python ../../source/scripts/build_tablet_v1_preview.py
+      - name: Verify preview and protect production
+        working-directory: public
+        run: |
+          test -s tablet-v1/index.html
+          grep -q 'tablet-v1-styles' tablet-v1/index.html
+          test -z "$(git diff --name-only -- index.html)"
+          git diff --check
+      - name: Publish tablet preview only
+        working-directory: public
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add tablet-v1/index.html
+          if ! git diff --cached --quiet; then
+            git commit -m "Publish isolated Tablet v1 preview"
+            git push origin HEAD:gh-pages
+          fi
