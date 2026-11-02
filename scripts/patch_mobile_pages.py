@@ -5,8 +5,20 @@ page = Path("index.html")
 html = page.read_text(encoding="utf-8")
 start = "<!-- MOBILE-RESPONSIVE-V1 START -->"
 end = "<!-- MOBILE-RESPONSIVE-V1 END -->"
-if start in html and end in html:
-    html = html[:html.index(start)] + html[html.index(end)+len(end):]
+# Remove only the previously injected CSS and controls. Never remove the
+# intervening dashboard markup between </head> and </body>.
+if start in html or end in html:
+    assert start in html and end in html, "Incomplete previous mobile patch"
+    css_start = html.index(start)
+    css_end_tag = "</style>"
+    css_end = html.index(css_end_tag, css_start) + len(css_end_tag)
+    html = html[:css_start] + html[css_end:]
+    html = html.replace(end, "", 1)
+    html = re.sub(r'<div id="pk-mobile-toolbar"\\b.*?</div>', "", html, count=1, flags=re.S)
+    html = re.sub(r'<div id="pk-mobile-map-options"\\b.*?</div>', "", html, count=1, flags=re.S)
+    html = re.sub(r'<script id="pk-mobile-interaction">.*?</script>', "", html, count=1, flags=re.S)
+# An older patch may have injected its CSS/JS without the current marker layout.
+html = re.sub(r'<style id="mobile-responsive-v1">.*?</style>', "", html, count=1, flags=re.S)
 css = r"""
 <style id="mobile-responsive-v1">
 @media (max-width: 760px) {
