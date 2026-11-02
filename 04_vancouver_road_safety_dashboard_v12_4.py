@@ -512,6 +512,78 @@ window.addEventListener('load',function(){
 });
 '''.replace('MAPVAR',m.get_name()).replace('GEOVAR',geo.get_name()).replace('ANNUAL',json.dumps(annual)).replace('PALETTES',json.dumps(PALETTES)).replace('INFRADATA',json.dumps(infra_data,separators=(',',':'),ensure_ascii=False)).replace('INFRANAMES',json.dumps(infra_names,ensure_ascii=False)).replace('COLLISIONDATA',json.dumps(collisions,separators=(',',':'))).replace('COLLISIONNAMES',json.dumps(collision_names,ensure_ascii=False))
  m.get_root().script.add_child(folium.Element(js))
+
+ # Responsive presentation only: retain all original controls and desktop behaviour.
+ mobile_css = """
+ <style>
+ @media (max-width: 760px) {
+   html,body {width:100%;max-width:100%;overflow-x:hidden}
+   .leaflet-container {touch-action:pan-x pan-y}
+   #pk-mobile-toolbar {display:flex!important}
+   #pk-panel,#pk-ranking,#pk-collision {
+     box-sizing:border-box!important;position:fixed!important;
+     left:10px!important;right:10px!important;width:auto!important;
+     max-width:none!important;z-index:10010!important;
+     border-radius:12px!important;box-shadow:0 8px 26px #0f172a40!important;
+   }
+   #pk-panel,#pk-ranking {top:64px!important;bottom:auto!important;
+     max-height:calc(100dvh - 82px)!important;overflow:auto!important}
+   #pk-collision {top:auto!important;bottom:10px!important;
+     height:auto!important;min-height:0!important;max-height:43dvh!important;
+     overflow:auto!important}
+   #pk-panel:not(.pk-mobile-open),#pk-ranking:not(.pk-mobile-open),
+   #pk-collision:not(.pk-mobile-open) {display:none!important}
+   #pk-panel select,#pk-ranking select,#pk-collision select {max-width:100%;font-size:16px}
+   #pk-panel button,#pk-ranking button,#pk-collision button {min-height:38px}
+   #pk-panel input[type=checkbox],#pk-collision input[type=checkbox] {min-width:18px;min-height:18px}
+ }
+ @media (min-width:761px) {#pk-mobile-toolbar {display:none!important}}
+ #pk-mobile-toolbar {position:fixed;display:none;top:calc(env(safe-area-inset-top,0px) + 8px);
+ left:10px;right:10px;z-index:10020;gap:7px;pointer-events:none}
+ #pk-mobile-toolbar button {pointer-events:auto;flex:1;min-width:0;padding:10px 5px;
+ border:1px solid #94a3b8;border-radius:10px;background:#fff;color:#172033;
+ font:600 13px Arial,sans-serif;box-shadow:0 2px 10px #0003}
+ #pk-mobile-toolbar button[aria-expanded=true] {background:#0f766e;color:white;border-color:#0f766e}
+ </style>
+ """
+ mobile_toolbar = """<div id="pk-mobile-toolbar" role="group" aria-label="Dashboard panels">
+ <button type="button" data-pk-target="pk-panel" aria-controls="pk-panel" aria-expanded="false">Filters</button>
+ <button type="button" data-pk-target="pk-ranking" aria-controls="pk-ranking" aria-expanded="false">Top 10</button>
+ <button type="button" data-pk-target="pk-collision" aria-controls="pk-collision" aria-expanded="false">Collisions</button>
+ </div>"""
+ mobile_js = """
+ (function(){
+   function init(){
+     var toolbar=document.getElementById('pk-mobile-toolbar');
+     if(!toolbar)return;
+     var buttons=Array.from(toolbar.querySelectorAll('button[data-pk-target]'));
+     var panels=buttons.map(function(b){return document.getElementById(b.dataset.pkTarget)});
+     function setOpen(id){
+       buttons.forEach(function(b,i){
+         var active=b.dataset.pkTarget===id;
+         b.setAttribute('aria-expanded',String(active));
+         if(panels[i])panels[i].classList.toggle('pk-mobile-open',active);
+       });
+     }
+     buttons.forEach(function(b){b.addEventListener('click',function(){
+       setOpen(b.getAttribute('aria-expanded')==='true'?'':b.dataset.pkTarget);
+     })});
+     // On mobile the map remains visible until the user opens a panel.
+     setOpen('');
+     var mq=window.matchMedia('(max-width: 760px)');
+     function updateMap(){if(window.L){document.querySelectorAll('.leaflet-container').forEach(function(el){
+       if(el._leaflet_id){try{var map=Object.values(window).find(function(v){return v&&v._container===el&&typeof v.invalidateSize==='function'});if(map)map.invalidateSize()}catch(e){}}
+     })}}
+     if(mq.addEventListener)mq.addEventListener('change',function(){setOpen('');setTimeout(updateMap,100)});
+   }
+   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);
+   else init();
+ })();
+ """
+ m.get_root().header.add_child(folium.Element(mobile_css))
+ m.get_root().html.add_child(folium.Element(mobile_toolbar))
+ m.get_root().script.add_child(folium.Element(mobile_js))
+
  output=OUT/'vancouver_road_safety_dashboard_v12_4.html'
  m.save(str(output))
  (OUT/'annual_ticket_summary_v6.csv').write_text('Year,Total,IS,VA,WR,VS\n'+''.join(f"{y},{annual[y]['total']},{annual[y]['IS']},{annual[y]['VA']},{annual[y]['WR']},{annual[y]['VS']}\n" for y in YEARS),encoding='utf-8')
