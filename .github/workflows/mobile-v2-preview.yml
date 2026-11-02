@@ -1,0 +1,54 @@
+name: Build Mobile v2 Preview (non-production)
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/mobile-v2-preview.yml'
+permissions:
+  contents: write
+concurrency:
+  group: mobile-v2-preview
+  cancel-in-progress: false
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          path: source
+      - name: Checkout Pages branch
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          path: public
+          persist-credentials: true
+      - name: Build isolated preview
+        run: |
+          mkdir -p mobile-v2
+          cp index.html mobile-v2/index.html
+          cd mobile-v2
+          python ../../source/scripts/build_mobile_v2_preview.py
+        working-directory: public
+      - name: Verify production unchanged and preview exists
+        run: |
+          test -s index.html
+          test -s mobile-v2/index.html
+          grep -q 'pk-mobile-v2-toolbar' mobile-v2/index.html
+          if git diff --name-only | grep -Fx 'index.html'; then
+            echo "Production dashboard must not change"; exit 1
+          fi
+          git diff --check
+        working-directory: public
+      - name: Publish preview subdirectory only
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add mobile-v2/index.html
+          if ! git diff --cached --quiet; then
+            git commit -m "Publish isolated mobile v2 preview (leave production intact)"
+            git push origin HEAD:gh-pages
+          fi
+        working-directory: public
